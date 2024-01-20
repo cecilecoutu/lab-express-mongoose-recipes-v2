@@ -1,5 +1,7 @@
 const express = require("express");
 const logger = require("morgan");
+require("dotenv").config();
+require("./config/db");
 
 const app = express();
 
@@ -14,15 +16,6 @@ const mongoose = require("mongoose");
 // app.js
 //...
 
-const MONGODB_URI = "mongodb://127.0.0.1:27017/express-mongoose-recipes-dev";
-
-mongoose
-  .connect(MONGODB_URI)
-  .then((x) =>
-    console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
-  )
-  .catch((err) => console.error("Error connecting to mongo", err));
-
 // ...
 
 // ROUTES
@@ -33,41 +26,45 @@ app.get("/", (req, res) => {
 
 //  Iteration 3 - Create a Recipe route
 
-// Import your Recipe model
-const Recipe = require("../models/Recipe");
+const Recipe = require("./models/Recipe.model");
 
 // POST /recipes route
-router.post("/recipes", async (req, res) => {
+app.post("/recipes", async (req, res) => {
   try {
-    const { title, ingredients, instructions } = req.body;
-
-    // Create a new recipe document
-    const newRecipe = new Recipe({
-      title,
-      ingredients,
-      instructions,
+    const createdRecipe = await Recipe.create({
+      title: req.body.title,
+      level: req.body.level,
+      ingredients: req.body.ingredients,
+      cuisine: req.body.cuisine,
+      dishType: req.body.dishType,
+      image: req.body.image,
+      duration: req.body.duration,
+      creator: req.body.creator,
     });
 
-    // Save the recipe to the database
-    await newRecipe.save();
-
-    // Respond with a success status code and the created recipe
-    res.status(201).json(newRecipe);
+    res.status(201).json(createdRecipe);
   } catch (error) {
-    // Handle errors, respond with a 500 status code and an error message
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error({ message: "Error while creating a new recipe", error });
+
+    res
+      .status(500)
+      .json({
+        message: "Error while creating a new recipe",
+        error: error.message,
+      });
   }
 });
-
-// Export the router for use in your main application file
-module.exports = router;
 
 //  Iteration 4 - Get All Recipes
 //  GET  /recipes route
 app.get("/recipes", (req, res) => {
-  Recipe.find().then((allRecipes) => {
-    res.status(200).json(allRecipes);
-  });
+  Recipe.find()
+    .then((allRecipes) => {
+      res.status(200).json(allRecipes);
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Error while getting all recipes" });
+    });
 });
 
 //  Iteration 5 - Get a Single Recipe
