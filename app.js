@@ -33,6 +33,7 @@ app.post("/recipes", async (req, res) => {
   try {
     const createdRecipe = await Recipe.create({
       title: req.body.title,
+      instructions: req.body.instructions,
       level: req.body.level,
       ingredients: req.body.ingredients,
       cuisine: req.body.cuisine,
@@ -46,12 +47,10 @@ app.post("/recipes", async (req, res) => {
   } catch (error) {
     console.error({ message: "Error while creating a new recipe", error });
 
-    res
-      .status(500)
-      .json({
-        message: "Error while creating a new recipe",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error while creating a new recipe",
+      error: error.message,
+    });
   }
 });
 
@@ -97,7 +96,7 @@ app.put("/recipes/:id", (req, res) => {
 app.delete("/recipes/:id", (req, res) => {
   Recipe.findByIdAndDelete(req.params.id)
     .then(() => {
-      res.status(204).send();
+      res.status(200).send({ message: "Recipe successfully deleted" });
     })
     .catch((error) => {
       res.status(500).json({ message: "Error while deleting a single recipe" });

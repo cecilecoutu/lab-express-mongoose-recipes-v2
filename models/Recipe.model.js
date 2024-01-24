@@ -3,6 +3,7 @@
 
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const model = require("mongoose");
 
 // CREATE A SCHEMA
 const recipeSchema = new Schema({
